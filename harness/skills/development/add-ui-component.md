@@ -1,281 +1,151 @@
 # Add UI Component
 
-Add a new React component following the project's conventions for structure, typing, styling, and placement.
+Add a new React component following the slice-local + Shared kernel layout this template uses.
 
-This skill assumes **React + TypeScript + Tailwind CSS** — the default frontend stack baked into this template. If your project picked a different framework at `init-harness` time, adapt this skill there.
+This skill assumes the **React + Vite + TypeScript + Tailwind** persona (`persona-react-vite.md`) is the active layout. If a different persona is active, adapt this skill or read the persona's UI conventions directly.
 
-If your work crosses into a code category not covered by this skill (e.g. you start adding an API endpoint while building a component), stop and consult the matching skill in `harness/skills/development/` before continuing.
-
----
+If your work crosses into a category not covered by this skill (e.g. you start touching the API endpoint while building a component), stop and consult the matching skill in `harness/skills/development/` before continuing.
 
 ## Prerequisites
 
 Read these before starting:
-- `harness/knowledge/repo-architecture/overview.md` — UI directory structure and import rules
-- `harness/knowledge/code-standards/naming-conventions.md` — naming patterns
 
----
+- `harness/knowledge/code-standards/ui/react-patterns.md` — component / hook / state idioms (produced by the persona)
+- `harness/knowledge/code-standards/ui/design-system.md` — design tokens, primitives, Tailwind discipline (produced by the persona)
+- `harness/knowledge/repo-architecture/vertical-slice-conventions.md` — slice contract
+- `harness/knowledge/code-standards/naming-conventions.md` — file naming
+- The design files under `designs/<FeatureName>/` for the slice you're working on. If missing, stop and ask the human for the design before writing.
 
-## Step 1 — Choose the Category
+## Step 1 — Decide: slice-local or Shared?
 
-Components live in one of three directories under `src/components/`. Pick the right one:
+| Question | Where it lives |
+|----------|----------------|
+| Used **only** by this slice's `Page.tsx`? | `src/Features/<FeatureName>/<ComponentName>.tsx` — flat, alongside `Page.tsx` |
+| Generic primitive (`Button`, `Modal`, `Card`, `Input`) reusable across slices, with no domain knowledge? | `src/Shared/Components/<ComponentName>.tsx` |
 
-| Category | Directory | When to use |
-|----------|-----------|-------------|
-| **Common** | `components/common/` | Generic, reusable primitives — no domain knowledge (Button, Modal, Table, SearchBar) |
-| **Domain** | `components/domain/<context>/` | Tied to a business concept — knows about a specific entity (e.g. `User`, `Order`, `Project`) |
-| **Layout** | `components/layout/` | App shell structure — sidebar, navigation, page frames |
+Decision rules:
 
-If unsure: does the component know about a specific entity type? → `domain/`. Could it work in any app? → `common/`. Does it define the page frame? → `layout/`.
+- **Default to slice-local.** Most components only belong to one slice. Lifting prematurely fragments the design system.
+- **Lift to `Shared/Components/`** only when a second slice genuinely needs it *and* the component is generic (no entity-shaped props).
+- If a "shared" component still wants entity-shaped props, it's a domain component — keep it slice-local in the slice that owns the entity.
 
----
+## Step 2 — Create the File
 
-## Step 2 — Create the File Structure
-
-Every component gets a named directory with `index.tsx` and `types.ts`:
-
-```
-components/<category>/<ComponentName>/
-├── index.tsx        # Component implementation and named export
-└── types.ts         # Props interface and component-specific types
-```
-
-For composite components with sub-components, nest them:
+A component is **a single `.tsx` file**. No per-component directory. No `index.tsx` + `types.ts` split. One file per component.
 
 ```
-components/domain/order/OrderList/
-├── index.tsx
-├── types.ts
-├── OrderCard/
-│   ├── index.tsx
-│   └── types.ts
-└── EmptyOrdersState/
-    ├── index.tsx
-    └── types.ts
+src/Features/CreateUser/Form.tsx           ← slice-local
+src/Shared/Components/Button.tsx           ← cross-slice primitive
 ```
 
----
+File name = component name = export name. PascalCase. Use a named export (no `default`).
 
-## Step 3 — Define the Props Interface
+## Step 3 — Implement
 
-Props interfaces live in `types.ts` with JSDoc on every prop.
+```tsx
+// src/Features/CreateUser/Form.tsx
+import { cn } from '~/Shared/Lib/cn';
 
-```typescript
-// components/domain/order/OrderCard/types.ts
-import type { Order } from '@shared/types/order';
-
-export interface OrderCardProps {
-  /** The order to display */
-  order: Order;
-  /** Callback when the card is clicked */
-  onClick?: (orderId: string) => void;
-  /** Whether the card is in a loading state */
-  isLoading?: boolean;
-  /** Additional CSS classes */
+type Props = {
+  busy?: boolean;
   className?: string;
-}
-```
+};
 
-### Rules
-
-- Plain PascalCase — e.g. `OrderCardProps`. Do not prefix with `I`.
-- JSDoc every prop.
-- Include `className?: string` for style composition.
-- Import shared types from `@shared/types/...` (or your chosen shared-types alias); never import from backend-only modules.
-
----
-
-## Step 4 — Implement the Component
-
-```typescript
-// components/domain/order/OrderCard/index.tsx
-import { cn } from '~/utils/cn';
-import type { OrderCardProps } from './types';
-
-export function OrderCard({
-  order,
-  onClick,
-  isLoading = false,
-  className,
-}: OrderCardProps): JSX.Element {
-  if (isLoading) {
-    return <div className={cn('animate-pulse h-24 bg-gray-100 rounded', className)} />;
-  }
-
+export function Form({ busy = false, className }: Props) {
   return (
-    <div
-      className={cn('p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow', className)}
-      onClick={() => onClick?.(order.id)}
-      role="button"
-      tabIndex={0}
-      aria-label={`Order: ${order.reference}`}
+    <form
+      className={cn('space-y-4 p-6', className)}
+      aria-busy={busy}
     >
-      <h3 className="font-medium text-gray-900">{order.reference}</h3>
-      {order.summary && (
-        <p className="text-sm text-gray-600">{order.summary}</p>
-      )}
-    </div>
+      <input
+        name="email"
+        type="email"
+        required
+        aria-label="email"
+        className="w-full rounded border border-neutral-300 px-3 py-2"
+      />
+      <button
+        type="submit"
+        disabled={busy}
+        className="rounded bg-brand-600 px-4 py-2 text-white disabled:opacity-50"
+      >
+        {busy ? 'Submitting…' : 'Create'}
+      </button>
+    </form>
   );
 }
 ```
 
 ### Rules
 
-- Functional components only — no class components.
-- Explicit `JSX.Element` return type.
-- Default values for optional props in the destructuring.
-- Handle loading and error states.
-- Use `cn()` (or `clsx`) to merge className props with internal classes.
-- Use Tailwind CSS for all styling — no inline styles, no CSS modules.
-- Accessible: semantic HTML, `aria-label` on interactive elements, keyboard support.
+- **Function components only.** No class components, no `React.FC`.
+- **Props are typed inline** as a `Props` type. JSDoc only when a prop's meaning isn't obvious from its name.
+- **Accept `className`** and merge with `cn()` so callers can extend styling without overrides.
+- **Default values for optional props** in the destructuring, not via `defaultProps`.
+- **Accessible by default**: semantic HTML, `aria-*` attributes where needed, keyboard reachable, focus visible.
+- **Tailwind classes only**. No inline `style={{}}`, no CSS modules, no styled-components.
+- **Design tokens, not raw hex values**. If a colour / spacing token isn't in `tailwind.config.ts`, add it there before using it in the component.
 
----
+## Step 4 — Import Boundaries
 
-## Step 5 — Respect Import Boundaries
+Slice-local components (`src/Features/<FeatureName>/*.tsx`) may import:
 
-Each category has strict import rules:
+- ✅ `~/Shared/Components/*` — generic primitives
+- ✅ `~/Shared/Lib/*` — pure helpers (`cn`, formatters)
+- ✅ `~/Shared/Hooks/*` — cross-cutting hooks (debounce, viewport, …)
+- ✅ `~/Shared/Domain/*` — domain types
+- ✅ same-slice files (`./Handler`, `./Contract`, `./<SiblingComponent>`)
+- ❌ `~/Features/<otherSlice>/*` — never. If you need it, lift to Shared.
+- ❌ `~/Shared/Infrastructure/*` — UI never touches concrete adapters; the composition root wires them.
 
-### `common/` components
+`Shared/Components/*` primitives may import:
 
-```
-✅ utils, hooks (cross-cutting)
-✅ shared/types       — only non-domain shared types
-❌ domain/            — common must not know about business concepts
-❌ backend/server/    — never
-```
+- ✅ `~/Shared/Lib/*`, `~/Shared/Hooks/*`
+- ❌ any domain type (no entity-shaped props — that's the test for "is this still generic?")
+- ❌ any `~/Features/*`
+- ❌ any `~/Shared/Infrastructure/*`
 
-### `domain/` components
+These mirror `dependency-rules.md`; they apply with no exception in the UI layer.
 
-```
-✅ common/            — reusable primitives
-✅ utils, hooks
-✅ shared/types       — entity types
-✅ API client / SDK   — for data fetching
-❌ backend/server/    — never
-❌ routes/pages/      — never
-```
+## Step 5 — Tests
 
-### `layout/` components
+A UI component test lives in the slice's `ui/` bucket:
 
 ```
-✅ common/            — reusable primitives
-✅ utils, hooks
-❌ domain/            — layout should not contain domain logic
-❌ backend/server/    — never
+tests/CreateUser/ui/Form.test.tsx
 ```
 
----
+Follow `harness/knowledge/code-standards/ui/testing.md`: query by accessible role (`getByRole('button', { name: /create/i })`), simulate with `@testing-library/user-event`, one assertion per test as a soft rule.
 
-## Step 6 — Add a Custom Hook (if needed)
+## Step 6 — Hooks (if needed)
 
-If the component fetches data or manages complex state, extract a hook and **co-locate it with its callers**.
+If the component manages state or fetches data, extract the hook:
 
-For a hook used by exactly one component, the hook lives inside that component's directory:
+- **Used by one component in this slice** → `src/Features/<FeatureName>/use<Thing>.ts` — flat, alongside the components.
+- **Used across multiple slices** → before sharing, check whether the logic actually belongs in `Handler.ts` (with a thin per-slice wrapper hook). Lift to `Shared/Hooks/` only if the logic has zero domain knowledge.
+- **Cross-cutting infrastructure** (debounce, viewport, network status) → `src/Shared/Hooks/use<Thing>.ts`.
 
-```typescript
-// components/domain/order/OrderList/useOrders.ts
-import { useState, useEffect } from 'react';
-import { fetchOrders } from '~/api/orders';
-import type { Order } from '@shared/types/order';
+Hooks return objects, not tuples — adding a new field is non-breaking.
 
-export interface UseOrdersReturn {
-  orders: Order[];
-  isLoading: boolean;
-  error: string | null;
-  refetch: () => Promise<void>;
-}
-
-export function useOrders(): UseOrdersReturn {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = async () => {
-    setIsLoading(true);
-    try {
-      setOrders(await fetchOrders());
-      setError(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to fetch orders');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => { load(); }, []);
-
-  return { orders, isLoading, error, refetch: load };
-}
-```
-
-### Rules
-
-- Return a typed interface (`Use<Name>Return`).
-- Include `isLoading`, `error`, and data states.
-- Provide a `refetch` function.
-- Hooks used by exactly one component dir → live inside that dir.
-- Hooks used by multiple components in one category → `<category>/<context>/hooks/`.
-- Generic infra hooks (DOM, viewport, debounce) → `~/hooks/`.
-
----
-
-## Step 7 — Connect to a Page Route
-
-Page routes consume components. Two data-loading patterns are typical:
-
-### Server-side via route loader (preferred for initial page data)
-
-```typescript
-// routes/orders.tsx (React Router v7 example)
-import { useLoaderData, type LoaderFunctionArgs } from 'react-router';
-import { fetchOrdersForUser } from '~/api/orders.server';
-import { OrderList } from '~/components/domain/order/OrderList';
-
-export async function loader({ request }: LoaderFunctionArgs) {
-  const orders = await fetchOrdersForUser(request);
-  return { orders };
-}
-
-export default function OrdersPage() {
-  const { orders } = useLoaderData<typeof loader>();
-  return <OrderList orders={orders} />;
-}
-```
-
-### Client-side fetch (for dynamic interactions)
-
-```typescript
-import { fetchOrders } from '~/api/orders';
-
-const handleSearch = async (query: string) => {
-  const results = await fetchOrders({ q: query });
-  setOrders(results);
-};
-```
-
----
-
-## Step 8 — Run Checks
+## Step 7 — Run Checks
 
 Execute `harness/skills/testing/run-code-checks.md`:
 
 - `npm run typecheck` — catches type mismatches in props and imports
-- `npm run build` — catches bundler-level boundary violations
 - `npm run lint` (if configured) — catches boundary violations and style nits
-
----
+- `npm run build` — catches bundler-level errors (unresolved imports, circular deps) that typecheck alone misses
+- `npm test` for the slice you're in
 
 ## Checklist
 
-Before considering the component complete:
-
-- [ ] Placed in the correct category (`common/`, `domain/`, `layout/`)
-- [ ] Directory structure: `ComponentName/index.tsx` + `types.ts`
-- [ ] Props interface uses bare PascalCase (no `I` prefix) and JSDoc on every prop
-- [ ] `className` prop accepted and merged with `cn()`
-- [ ] Loading and error states handled
-- [ ] Accessible: semantic HTML, aria labels, keyboard support
-- [ ] Import boundaries respected (no backend imports, correct category rules)
-- [ ] Hook co-located per the rule above if the component manages async data
-- [ ] Tailwind CSS used for all styling
-- [ ] All checks pass (`typecheck`, `build`)
+- [ ] Single `.tsx` file (no per-component directory)
+- [ ] Placed correctly: slice-local in `src/Features/<X>/` (flat) or `src/Shared/Components/` if generic
+- [ ] PascalCase file name = component name = named export
+- [ ] Props typed inline as a `Props` type
+- [ ] Accepts `className`; merges with `cn()` from `~/Shared/Lib/cn`
+- [ ] Tailwind classes only; design tokens not raw hex
+- [ ] Accessible (semantic HTML, ARIA, keyboard, focus visible)
+- [ ] Test at `tests/<FeatureName>/ui/<ComponentName>.test.tsx`
+- [ ] Import boundaries respected (no cross-slice, no Infrastructure)
+- [ ] Hook co-located per the rule above if the component manages async state
+- [ ] All checks pass (`typecheck`, `lint`, `build`, `test`)

@@ -28,16 +28,17 @@ src/Features/CreateUser/
 ├── Page.tsx           ← UI Layer: the React component (the "Screen").
 ├── Handler.ts         ← Application Service: pure logic, called by action.
 ├── Contract.ts        ← DTO: Zod schemas for request/response/form validation.
-└── Components/        ← Slice-local UI pieces used only by this Page.
+├── Form.tsx           ← Slice-local UI piece used only by this Page (zero or more)
+└── ProgressBar.tsx    ← Another slice-local piece — kept flat, no nested folder
 ```
 
 | File | Role | Onion equivalent | Responsibilities |
 |------|------|------------------|------------------|
 | `Route.tsx` | Driving Adapter | Controller / HTTP boundary | Parse `FormData` / `URL`; call `Contract`'s Zod schema; on failure return `400`; on success delegate to `Handler` and return `redirect` / `Response`. **No business logic.** |
-| `Page.tsx` | View | UI Layer | Render the page using loader data. Receives props or uses `useLoaderData`. Knows about layout and `Components/`; does not know about the database. |
+| `Page.tsx` | View | UI Layer | Render the page using loader data. Receives props or uses `useLoaderData`. Composes the slice-local sub-components; does not know about the database. |
 | `Handler.ts` | Application Service | Application Service | Pure async function (or small object). Receives a validated input from `Route.tsx`. Calls `shared/Domain` for rules, `shared/Abstractions` for ports. Returns a result. **No `Request`, no `Response`, no React.** |
 | `Contract.ts` | DTO + boundary | DTO / Schema | Zod schemas for the request body, form payload, response shape. Exports inferred types. The single source of truth for what `Route.tsx` accepts. |
-| `Components/` | Slice-local UI | UI Layer | Sub-components used **only** by this slice's `Page.tsx`. If a component is reused across slices, lift it to `src/Shared/Components/`. |
+| `<SubComponent>.tsx` | Slice-local UI | UI Layer | Sub-components used **only** by this slice's `Page.tsx`. Live as flat `.tsx` files in the feature folder — no `Components/` subdirectory. If a component is reused across slices, lift it to `src/Shared/Components/`. |
 
 ### SPA variant (no React Router)
 

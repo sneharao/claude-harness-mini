@@ -31,7 +31,7 @@ src/features/create-user/
 ├── <command/contract file>     ← input contract with validation (e.g. Zod schema)
 ├── <handler file>              ← business logic — pure, no transport concerns
 ├── <view file>                 ← UI component (only when the stack has a UI)
-└── components/                 ← slice-local sub-components (optional; only used by this slice)
+└── <sub-component files>       ← optional slice-local sub-components — flat files alongside the view; only used by this slice
 
 tests/create-user/
 ├── api/          ← contract tests against the endpoint
@@ -52,7 +52,7 @@ The chosen persona is the authoritative source for the slice shape in that stack
 
 Known persona overrides shipped today:
 
-- **React + Vite (`persona-react-vite.md`)** — Onion-ready split. Folders are PascalCase (`Features/CreateUser/`). Slice files: `Route.tsx` (loader/action — driving adapter), `Page.tsx` (view), `Handler.ts` (logic), `Contract.ts` (Zod schemas), `Components/` (slice-local UI). SPA variant (no React Router) swaps `Route.tsx` for `Api.ts`. See the persona file for the full details and rationale.
+- **React + Vite (`persona-react-vite.md`)** — Onion-ready split. Folders are PascalCase (`Features/CreateUser/`). Slice files: `Route.tsx` (loader/action — driving adapter), `Page.tsx` (view), `Handler.ts` (logic), `Contract.ts` (Zod schemas), with any slice-local sub-components as flat `.tsx` files in the feature folder (no `Components/` subdirectory). SPA variant (no React Router) swaps `Route.tsx` for `Api.ts`. See the persona file for the full details and rationale.
 - **Next.js** (when a persona is added) — feature folders live under `app/<feature>/` (App Router) or `pages/<feature>/` (Pages Router). The endpoint becomes the route's `route.ts` (App Router API) or the page-level data-fetcher. The view becomes `page.tsx`. Command and handler still exist as separate files inside the feature folder.
 - **C# / .NET** (when a persona is added) — folders are `PascalCase` (`Features/CreateUser/`), files use `.cs`, no view file (UI is decided per project — Razor, Blazor, separate SPA).
 - **Backend-only services** (when a persona is added) — no view file, no `/designs/`, no `ui/` tests. Everything else holds.
