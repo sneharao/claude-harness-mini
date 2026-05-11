@@ -47,12 +47,15 @@ For every user request:
 2. Discover what the harness already says about it:
 
    ```bash
-   find harness -type f -name "*.md" -not -path "*/.git*" | sort
+   harness/utils/list-harness.sh                    # all areas
+   harness/utils/list-harness.sh knowledge skills    # narrow by area
    ```
 
 3. Read every matching file in full and follow it.
 
 Skip only when, after checking, the harness has nothing relevant. The harness takes precedence over your defaults.
+
+> **Context guard:** `skills/init/persona-*.md` files are large and only relevant during `/harness/000-design` or `/harness/init-harness`. Do not read them on routine plan/build/review tasks.
 
 ---
 
@@ -72,11 +75,11 @@ Cloud review, multi-agent fan-out, and housekeeping live in the **enterprise** t
 
 ## Observability
 
-Agent calls are traced to LangFuse Cloud (free tier). See `.observability/README.md` for setup. Every stage logs its trace ID so you can debug a session after the fact.
+Agent calls are traced via OpenTelemetry to a local collector that writes JSONL files under `.observability/traces/`. See `.observability/README.md` for setup. The SessionStart hook starts the collector automatically if Docker is available.
 
 ## Evals
 
-`.evals/` holds gold fixtures + LLM-as-judge prompts. Run `npm run evals` to grade the harness against past runs and catch regressions before they ship.
+`.evals/` holds a run-summary script. Run `node .evals/run-report.mjs` after a session to get a per-session report from the OTLP traces (duration, tool-call breakdown, event mix).
 
 ## Memory
 
