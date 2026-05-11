@@ -87,9 +87,12 @@ ls harness/skills/init/persona-*.md
 
 Show the human the options. Each persona declares the stack it bootstraps (read the persona's front matter or first heading). Ask the human which one to apply.
 
-If no listed persona fits, stop and tell the human:
+If no listed persona fits, present two options to the human:
 
-> No persona matches the requested stack. Either pick the closest existing persona and we'll adjust afterwards, or add a new `persona-<stack>.md` first. I won't fabricate one.
+- **Option A — Defer the persona (recommended).** Skip Step 7. The project will use the generic vertical-slice shape from `harness/knowledge/repo-architecture/vertical-slice-conventions.md` (kebab-case `src/features/<name>/` with the role-split contract). Write an ADR per `harness/skills/planning/write-adr.md` recording the decision: *"Persona for `<stack>` not yet authored — using generic vertical-slice shape until added."* Continue to Step 8.
+- **Option B — Pick the closest persona and adjust.** Pick the closest existing persona (e.g. React+Vite for a generic SPA), execute it, then patch what doesn't fit. Document divergences in an ADR.
+
+Do not fabricate a persona inline.
 
 ### Step 7 — Execute Persona
 
@@ -102,26 +105,49 @@ Read the chosen persona file in full. Execute its instructions:
 
 ### Step 8 — Initialise Source Tree
 
-Create the empty top-level directories implied by the architecture shape. Default vertical-slice + shared kernel:
+If the persona in Step 7 declared source-tree paths or scaffolded the project (e.g. via `npm create vite@latest`), the persona is responsible — no action here.
+
+If no persona was applied (Step 6 Option A), create the generic vertical-slice scaffold:
 
 ```bash
 mkdir -p src/features src/shared/domain src/shared/abstractions src/shared/infrastructure tests designs
 ```
 
-If the persona overrides the layout, use the persona's paths instead. Do not pre-create per-feature folders — those land when the first feature is planned.
+Do not pre-create per-feature folders — those land when the first feature is planned.
 
-### Step 9 — Commit
+### Step 9 — Resolve AGENTS.md Placeholders
+
+Replace the template placeholders in `AGENTS.md` with the values you collected in Step 3:
+
+```bash
+grep -n '{{' AGENTS.md
+```
+
+For each placeholder found:
+
+- `{{PROJECT_NAME}}` → the project name from Step 3.
+- `{{PROJECT_TAGLINE}}` → the one-line tagline from Step 3.
+
+Edit `AGENTS.md` accordingly. Then verify zero placeholders remain:
+
+```bash
+grep -q '{{' AGENTS.md && echo "STILL HAS PLACEHOLDERS" || echo "OK"
+```
+
+Do not commit until this prints `OK`.
+
+### Step 10 — Commit
 
 Stage and commit the design output:
 
 ```bash
-git add harness/knowledge/domain/ harness/knowledge/architecture-decision-records/ package.json src/ tests/ designs/
+git add AGENTS.md harness/knowledge/domain/ harness/knowledge/architecture-decision-records/ package.json src/ tests/ designs/
 git commit
 ```
 
 Use a commit message that captures the design output, per `harness/skills/development/commit-changes.md`. Push if a remote is configured.
 
-### Step 10 — Summary
+### Step 11 — Summary
 
 Tell the human:
 
