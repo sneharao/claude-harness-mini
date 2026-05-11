@@ -86,6 +86,36 @@ Run `/harness/init-harness` — it audits the existing code, seeds domain files 
 
 ---
 
+## Commit guardrails
+
+Two layers keep bad commits out:
+
+**Layer 1 — git pre-commit hook** (applies to every commit from any tool):
+```bash
+git config core.hooksPath .githooks   # activate once per clone
+chmod +x .githooks/pre-commit         # ensure executable after rsync
+```
+Runs `npm run lint` and `npm test` on every commit. Both use `--if-present` — projects that haven't defined those scripts yet skip silently. Opt in to build check for a single commit:
+```bash
+HARNESS_PRECOMMIT_BUILD=1 git commit -m "..."
+```
+Bypass when you genuinely need to (docs-only typo, emergency patch):
+```bash
+git commit --no-verify -m "..."
+```
+
+**Layer 2 — SessionStart reminder**: if `.githooks` isn't activated, every session shows:
+```
+[harness] pre-commit hook not active — run: git config core.hooksPath .githooks
+```
+So you're nudged every session until you do it.
+
+## .env protection
+
+`.claude/settings.json` denies `Read`, `Edit`, and `Write` on `.env*` files — Claude can't open them via file tools. The `pretooluse.sh` hook also blocks shell commands (`cat`, `grep`, `sed`, `source`, `cp`, `mv`) that would dump `.env` contents. Safe path: `printenv VAR_NAME` for individual values.
+
+---
+
 ## What runs automatically (SessionStart hook)
 
 `.claude/hooks/session-start.sh` fires once each time you open Claude Code in this repo. It solves two recurring annoyances:

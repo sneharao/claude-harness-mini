@@ -54,4 +54,14 @@ if [ -d harness/exec-plans ]; then
   [ -n "$active" ] && echo "[harness] active plan: $active"
 fi
 
+# 4. Pre-commit guardrail activation check.
+if [ -f .githooks/pre-commit ]; then
+  hookspath="$(git config --get core.hooksPath 2>/dev/null || true)"
+  if [ "$hookspath" != ".githooks" ]; then
+    echo "[harness] pre-commit hook not active — run: git config core.hooksPath .githooks"
+  elif [ ! -x .githooks/pre-commit ]; then
+    echo "[harness] .githooks/pre-commit exists but isn't executable — run: chmod +x .githooks/pre-commit"
+  fi
+fi
+
 exit 0

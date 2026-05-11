@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Pre-commit guardrail. Lint + tests always; build opt-in.
+#
+# Activate once per clone:   git config core.hooksPath .githooks
+# Bypass a single commit:    git commit --no-verify
+# Add build check this run:  HARNESS_PRECOMMIT_BUILD=1 git commit ...
+#
+# Assumes npm. Edit the npm calls if you use pnpm/yarn/bun.
+# Scripts are checked via --if-present, so projects that haven't defined
+# `lint` / `test` / `build` skip silently — no false fails during early
+# design/build stages.
+
+set -u
+export CI=true   # vitest, jest, react-scripts all respect this → non-watch run
+
+cd "$(git rev-parse --show-toplevel)"
+
+if [ ! -f package.json ]; then
+  exit 0
+fi
+
+echo "[pre-commit] lint…"
+if ! npm run lint --if-present --silent; then
+  echo "[pre-commit] lint failed"
+  exit 1
+fi
+
+echo "[pre-commit] test…"
+if ! npm test --if-present --silent; then
+  echo "[pre-commit] tests failed"
+  exit 1
+fi
+
+if [ "${HARNESS_PRECOMMIT_BUILD:-0}" = "1" ]; then
+  echo "[pre-commit] build…"
+  if ! npm run build --if-present --silent; then
+    echo "[pre-commit] build failed"
+    exit 1
+  fi
+fi
+
+echo "[pre-commit] ok"
+exit 0
