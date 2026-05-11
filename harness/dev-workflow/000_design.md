@@ -25,6 +25,7 @@ The output is a set of `.md` files under `harness/knowledge/domain/` and a boots
 - `harness/knowledge/architecture-decision-records/ABOUT.md` — how to capture an architecture override.
 - `harness/skills/init/seed-domain-knowledge.md` — the sub-skill that writes the three domain files.
 - `harness/skills/init/persona-*.md` — available stack personas.
+- `harness/skills/personas/README.md` — expert advisory personas. Consult its Phase Map and Pairing Matrix to pick which to invoke; use `persona-panel.md` when you want structured dissent.
 
 ## Steps
 

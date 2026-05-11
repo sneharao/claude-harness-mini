@@ -14,6 +14,7 @@ Collaborate with the human to produce a complete, unambiguous coding plan that a
 - Task definition — chat message, ticket file, or spec
 - Design artifacts (Figma, sketches, written spec) if any
 - Library docs via Context7 MCP or web search
+- `harness/skills/personas/README.md` — expert advisory personas. Consult its Phase Map and Pairing Matrix to pick which to invoke; use `persona-panel.md` when a decision benefits from structured dissent.
 
 ## Steps
 

@@ -29,7 +29,8 @@ harness/
     ├── development/                    — Writing code (TDD, add-*, commit, run-app)
     ├── testing/                        — Running checks
     ├── planning/                       — Plan critique
-    └── init/                           — One-time project bootstrap
+    ├── init/                           — One-time project bootstrap (stack personas)
+    └── personas/                       — Expert advisory personas + persona-panel meta-skill (see personas/README.md)
 ```
 
 ### How to Use
@@ -55,7 +56,7 @@ For every user request:
 
 Skip only when, after checking, the harness has nothing relevant. The harness takes precedence over your defaults.
 
-> **Context guard:** `skills/init/persona-*.md` files are large and only relevant during `/harness/000-design` or `/harness/init-harness`. Do not read them on routine plan/build/review tasks.
+> **Context guard:** two unrelated kinds of "persona" live in this harness, do not conflate them. `skills/init/persona-*.md` are **stack personas** (React+Vite, etc.) — large files, used once during `/harness/000-design` or `/harness/init-harness` to scaffold the project; do not read on routine plan/build/review tasks. `skills/personas/*.md` are **expert advisory personas** — smaller files, consulted on demand during design/planning/review; see their `README.md` for the Phase Map.
 
 ---
 
