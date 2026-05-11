@@ -1,0 +1,190 @@
+#!/usr/bin/env node
+// V1 run-summary judge. Parses .observability/traces/logs.jsonl
+// (OTLP logs from Claude Code), groups events by session.id, writes
+// .evals/reports/<session-id>.md.
+//
+// No dependencies — plain Node ESM, runs on any node >= 18.
+//
+// Usage:
+//   node .evals/run-report.mjs                  # latest session
+//   node .evals/run-report.mjs --session=<id>   # specific session
+//   node .evals/run-report.mjs --all            # every session in the log
+
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+
+const LOGS = '.observability/traces/logs.jsonl';
+const REPORTS_DIR = '.evals/reports';
+
+const argv = process.argv.slice(2);
+const sessionFlag = argv.find((a) => a.startsWith('--session='));
+const sessionArg = sessionFlag ? sessionFlag.slice('--session='.length) : null;
+const allFlag = argv.includes('--all');
+
+if (!existsSync(LOGS)) {
+  console.error(`No log file at ${LOGS}.`);
+  console.error(`Start the collector: cd .observability && docker compose up -d`);
+  process.exit(1);
+}
+
+const raw = readFileSync(LOGS, 'utf8').trim();
+if (!raw) {
+  console.error(`${LOGS} is empty — no events recorded yet.`);
+  process.exit(1);
+}
+
+const records = parseLogRecords(raw);
+if (records.length === 0) {
+  console.error('Parsed zero log records. Is the collector wired up correctly?');
+  process.exit(1);
+}
+
+const bySession = groupBy(records, (r) => r.sessionId);
+
+const targetIds = sessionArg
+  ? [sessionArg]
+  : allFlag
+    ? [...bySession.keys()]
+    : [latestSessionId(bySession)];
+
+mkdirSync(REPORTS_DIR, { recursive: true });
+
+for (const sid of targetIds) {
+  const events = bySession.get(sid);
+  if (!events) {
+    console.error(`Session ${sid} not found in ${LOGS}.`);
+    continue;
+  }
+  events.sort((a, b) => a.time - b.time);
+  const md = renderReport(sid, events);
+  const out = join(REPORTS_DIR, `${sid}.md`);
+  writeFileSync(out, md);
+  console.log(`Wrote ${out}`);
+}
+
+// ---------------------------------------------------------------- parse
+
+function parseLogRecords(text) {
+  const out = [];
+  for (const line of text.split('\n')) {
+    if (!line.trim()) continue;
+    let payload;
+    try {
+      payload = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    for (const rl of payload.resourceLogs || []) {
+      const resourceAttrs = flattenAttrs(rl.resource?.attributes);
+      for (const sl of rl.scopeLogs || []) {
+        for (const lr of sl.logRecords || []) {
+          const attrs = { ...resourceAttrs, ...flattenAttrs(lr.attributes) };
+          out.push({
+            time: Number(lr.timeUnixNano || lr.observedTimeUnixNano || 0) / 1e9,
+            eventName:
+              attrs['event.name'] ||
+              attrs['log.name'] ||
+              lr.body?.stringValue ||
+              '(unnamed)',
+            sessionId:
+              attrs['session.id'] ||
+              attrs['claude.session.id'] ||
+              attrs['service.instance.id'] ||
+              'unknown',
+            attrs,
+          });
+        }
+      }
+    }
+  }
+  return out;
+}
+
+function flattenAttrs(attrs) {
+  const out = {};
+  for (const a of attrs || []) {
+    const v = a.value || {};
+    out[a.key] =
+      v.stringValue ??
+      v.intValue ??
+      v.boolValue ??
+      v.doubleValue ??
+      (v.arrayValue ? JSON.stringify(v.arrayValue) : undefined);
+  }
+  return out;
+}
+
+function groupBy(items, keyFn) {
+  const map = new Map();
+  for (const it of items) {
+    const k = keyFn(it);
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(it);
+  }
+  return map;
+}
+
+function latestSessionId(map) {
+  let bestId = null;
+  let bestT = -Infinity;
+  for (const [id, evts] of map) {
+    const lastT = evts.reduce((acc, e) => Math.max(acc, e.time), -Infinity);
+    if (lastT > bestT) {
+      bestT = lastT;
+      bestId = id;
+    }
+  }
+  return bestId;
+}
+
+// ---------------------------------------------------------------- render
+
+function renderReport(id, evts) {
+  const start = evts[0].time;
+  const end = evts[evts.length - 1].time;
+  const durationMin = ((end - start) / 60).toFixed(1);
+
+  const eventCounts = {};
+  const toolCounts = {};
+  let userPrompts = 0;
+
+  for (const e of evts) {
+    eventCounts[e.eventName] = (eventCounts[e.eventName] || 0) + 1;
+    if (e.eventName.includes('user_prompt')) userPrompts++;
+    if (e.eventName.includes('tool')) {
+      const tool = e.attrs['tool_name'] || e.attrs['tool.name'] || 'unknown';
+      toolCounts[tool] = (toolCounts[tool] || 0) + 1;
+    }
+  }
+
+  const lines = [
+    `# Run Report — ${id}`,
+    ``,
+    `- **Window:** ${iso(start)} → ${iso(end)}`,
+    `- **Duration:** ${durationMin} min`,
+    `- **Total events:** ${evts.length}`,
+    `- **User prompts (back-and-forth):** ${userPrompts}`,
+    ``,
+    `## Tool calls`,
+    ``,
+    ...byCount(toolCounts),
+    ``,
+    `## Event mix`,
+    ``,
+    ...byCount(eventCounts),
+    ``,
+    `---`,
+    `Generated by \`.evals/run-report.mjs\``,
+  ];
+  return lines.join('\n') + '\n';
+}
+
+function byCount(obj) {
+  const entries = Object.entries(obj).sort((a, b) => b[1] - a[1]);
+  if (entries.length === 0) return ['_none_'];
+  return entries.map(([k, v]) => `- \`${k}\`: ${v}`);
+}
+
+function iso(epochSeconds) {
+  return new Date(epochSeconds * 1000).toISOString();
+}

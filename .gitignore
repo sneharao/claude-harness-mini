@@ -41,6 +41,9 @@ pnpm-debug.log*
 .evals/baselines/*.candidate.json
 .evals/.last-run.json
 
+# Per-session run reports — regenerable from .observability/traces/
+.evals/reports/
+
 # OS
 .DS_Store
 Thumbs.db
