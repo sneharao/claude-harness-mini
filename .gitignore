@@ -27,6 +27,9 @@ out/
 .observability/*.local.json
 *.local.env
 
+# OTel collector output — large, machine-specific, regenerated per session
+.observability/traces/
+
 # Logs
 *.log
 npm-debug.log*
