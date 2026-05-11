@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+.yarn/cache/
+.yarn/install-state.gz
+
+# Build output
+dist/
+build/
+.next/
+.nuxt/
+out/
+.turbo/
+.vite/
+*.tsbuildinfo
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Observability / API keys (anything ending .local.ts opts-out of git)
+.observability/*.local.ts
+.observability/*.local.json
+*.local.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Eval baselines that haven't been promoted yet
+.evals/baselines/*.candidate.json
+.evals/.last-run.json
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE / editor
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Coverage / test outputs
+coverage/
+*.lcov
+.nyc_output/
+.vitest-cache/
+
+# Misc
+.cache/
+tmp/
+temp/
