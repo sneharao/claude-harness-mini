@@ -13,8 +13,8 @@ The "mini" name is deliberate: this is the lean, solo-grade variant. An enterpri
 ├── AGENTS.md                — canonical entry point read by every AI assistant
 ├── CLAUDE.md                — Claude Code shim that @-imports AGENTS.md
 ├── .claude/                 — slash commands, hooks, settings.json
-├── .evals/                  — gold fixtures + LLM-as-judge prompts + runner
-├── .observability/          — LangFuse Cloud config (free tier)
+├── .evals/                  — OTLP-log summarizer + dirs reserved for future quality grading
+├── .observability/          — local OTel collector (Docker) writing JSONL traces
 └── harness/
     ├── dev-workflow/        — Plan, Build, Local Review stage files
     ├── exec-plans/          — per-feature plans live here on the branch
@@ -77,6 +77,17 @@ Run `/harness/init-harness` — it audits the existing code, seeds domain files 
 | 4-persona review of the pushed branch | `/harness/003-review-pr` |
 | Format and create a commit | `/develop/commit-changes` |
 | Run typecheck + build + tests | `/develop/run-checks` |
+
+---
+
+## What runs automatically (SessionStart hook)
+
+`.claude/hooks/session-start.sh` fires once each time you open Claude Code in this repo. It solves two recurring annoyances:
+
+1. **Silent observability gaps.** If the OTel collector isn't running, telemetry vanishes and `.evals/run-report.mjs` produces empty reports. The hook starts the collector if Docker is available and the container isn't already up.
+2. **Cold-start context.** Every fresh session, the agent has no clue which branch you're on or what's dirty. The hook prints a one-screen orientation (branch, last commit, dirty count, active exec-plan) so the agent skips a flurry of `git status` tool calls.
+
+Best-effort only — missing Docker, missing git, etc. degrade to a warning and continue. Registered in `.claude/settings.json`; disable by removing the `SessionStart` entry.
 
 ---
 
