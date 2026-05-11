@@ -56,10 +56,16 @@ Run `/harness/000-design` the same way.
 ```bash
 cd ~/path/to/existing-project
 rsync -a --ignore-existing \
+  --exclude='.git/' \
+  --exclude='node_modules/' \
+  --exclude='.observability/traces/' \
+  --exclude='.env' \
   ~/Downloads/projects/claude-harness-mini/ \
   ./
 claude
 ```
+
+`--ignore-existing` preserves your project's files when they collide; the excludes stop us from copying the harness repo's own `.git/` (which would overwrite your history), local node_modules, generated traces, and any local secrets.
 
 Run `/harness/init-harness` — it audits the existing code, seeds domain files from what's there, and surfaces drift against the harness conventions.
 
