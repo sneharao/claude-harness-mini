@@ -81,8 +81,8 @@ Run `/harness/init-harness` — it audits the existing code, seeds domain files 
 | Build the planned feature | `/harness/002-build` |
 | 4-persona review of uncommitted changes | `/harness/003-review-local` |
 | 4-persona review of the pushed branch | `/harness/003-review-pr` |
-| Format and create a commit | `/develop/commit-changes` |
-| Run typecheck + build + tests | `/develop/run-checks` |
+| Apply triaged PR-review fixes | `/harness/004-apply-fixes` |
+| Post-merge housekeeping sweep | `/harness/005-housekeeping` |
 
 ---
 
