@@ -12,17 +12,21 @@ This document is **orientation context**, not an executable skill. Your specific
 |-------|------------|
 | Plan | `001_plan.md` |
 | Build | `002_build.md` |
-| Review (PR) | `003_1_review_pr.md` |
 | Review (local) | `003_2_review_local.md` |
+| Review (PR) | `003_1_review_pr.md` |
+| Apply Fixes | `004_apply_fixes.md` |
+| Housekeeping | `005_housekeeping.md` |
 
 - **Plan** — Planning Agent + Human, read-only.
 - **Build** — Coding Agent, edits + shell.
-- **Review (PR)** — Reviewer Agent runs 4 personas against a pushed branch (`git diff main...HEAD`).
-- **Review (local)** — Reviewer Agent runs the same 4 personas against `git diff HEAD` before pushing.
+- **Review (local)** — Reviewer Agent runs 4 personas against `git diff HEAD` before pushing — tight loop.
+- **Review (PR)** — Reviewer Agent runs the same 4 personas against `git diff main...HEAD` after pushing — fresh-context pass before merge.
+- **Apply Fixes** — Fixer Agent reads triaged PR comments, applies changes, verifies locally, pushes. Bounded by the Impasse Protocol (3 rounds per thread).
+- **Housekeeping** — Housekeeping Agent sweeps deferred/dismissed findings into a `housekeeping_audit.md`, archives the exec-plan, syncs the debt file, and promotes correction patterns. Final stage of the feature lifecycle.
 
-Every stage runs locally in this mini template. The **enterprise** variant adds cloud reviewers, multi-agent fan-out, apply-fixes, and housekeeping.
+Every stage runs locally in this template. Multi-agent fan-out and cloud reviewers (running personas in separate isolated runtimes) live in larger variants — the loop-closing stages (apply-fixes, housekeeping) ship here.
 
-The two review modes share personas (QA, Code Quality, Security, Architecture) and the Evidence Rule. Use **local** mid-iteration for a tight loop; use **PR** once code is pushed for a fresh-context pass before merge.
+The two review modes share personas (QA, Code Quality, Security, Architecture) and the Evidence Rule.
 
 ---
 
@@ -33,13 +37,14 @@ flowchart LR
     H1([Human]) -->|trigger| P[001 Plan]
     P -->|plan committed| H2{{Approve plan}}
     H2 -->|trigger build| B[002 Build]
-    B -->|"implement → verify → fix"| H3{{Approve diff}}
-    H3 -->|before push| RL[003.2 Local]
-    H3 -->|after push| RPR[003.1 PR]
-    RL --> F[Findings P0-P3]
-    RPR --> F
-    F -->|fixes needed| B
-    F -->|approved| M([Merge to main])
+    B -->|implement → verify| RL[003.2 Review Local]
+    RL -->|P0/P1 findings| B
+    RL -->|approved → push| RPR[003.1 Review PR]
+    RPR -->|triage comments| AF[004 Apply Fixes]
+    AF -->|fixes pushed| RPR
+    RPR -->|approved| M([Merge to main])
+    M --> HK[005 Housekeeping]
+    HK -->|audit PR| HKM([Housekeeping merged])
 ```
 
 ---

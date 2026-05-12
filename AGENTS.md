@@ -20,8 +20,9 @@ The harness treats the model as a code-generation backend in a compiler pipeline
 
 ```
 harness/
-├── dev-workflow/        — Stages the harness guides you through (Plan, Build, Review)
-├── exec-plans/          — Per-feature plan + decisions, lives on the branch
+├── dev-workflow/        — Stages the harness guides you through (Plan, Build, Review, Apply Fixes, Housekeeping)
+├── exec-plans/          — Per-feature plan + decisions, lives on the branch (archived under _archive/ post-merge)
+├── housekeeping/        — Long-lived ledgers: technical debt + agent corrections log
 ├── knowledge/           — What the system is, why it is built this way (read on demand)
 │   ├── code-standards/                 — Naming, error handling, language idioms
 │   └── repo-architecture/              — Structure, dependency rules, conventions
@@ -29,6 +30,8 @@ harness/
     ├── development/                    — Writing code (TDD, add-*, commit, run-app)
     ├── testing/                        — Running checks
     ├── planning/                       — Plan critique
+    ├── housekeeping/                   — Logging corrections, harness-improvement reviews
+    ├── accessing-systems/              — How to reach external systems (GitHub, etc.)
     ├── init/                           — One-time project bootstrap (stack personas)
     └── personas/                       — Expert advisory personas + persona-panel meta-skill (see personas/README.md)
 ```
@@ -68,9 +71,12 @@ Skip only when, after checking, the harness has nothing relevant. The harness ta
 | **Init (existing project, once)** | `harness/skills/init/init-harness.md` | When grafting the harness onto a codebase that already has source |
 | **① Plan** | `harness/dev-workflow/001_plan.md` | Start of every feature — produces an exec-plan |
 | **② Build** | `harness/dev-workflow/002_build.md` | After the plan is approved |
-| **③ Review (local)** | `harness/dev-workflow/003_2_review_local.md` | Before pushing — 5-persona local review |
+| **③ Review (local)** | `harness/dev-workflow/003_2_review_local.md` | Before pushing — 4-persona review of `git diff HEAD` |
+| **③ Review (PR)** | `harness/dev-workflow/003_1_review_pr.md` | After pushing — 4-persona review of `git diff main...HEAD` |
+| **④ Apply Fixes** | `harness/dev-workflow/004_apply_fixes.md` | After the human triages PR comments — apply, verify, push (Impasse Protocol bounds the loop) |
+| **⑤ Housekeeping** | `harness/dev-workflow/005_housekeeping.md` | After merge — capture deferred findings, archive exec-plan, sync debt file |
 
-Cloud review, multi-agent fan-out, and housekeeping live in the **enterprise** template. This one is solo-grade by design.
+Multi-agent fan-out (running personas in separate isolated runtimes) and cloud reviewers live in larger variants. This template ships the full feature lifecycle — including the loop-closing stages — so deferred findings never silently vanish.
 
 ---
 
