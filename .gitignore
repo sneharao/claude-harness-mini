@@ -37,8 +37,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Eval baselines that haven't been promoted yet
-.evals/baselines/*.candidate.json
 .evals/.last-run.json
 
 # Per-session run reports — regenerable from .observability/traces/

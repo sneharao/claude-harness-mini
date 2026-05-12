@@ -20,6 +20,15 @@
             "command": "bash .claude/hooks/pretooluse.sh"
           }
         ]
+      },
+      {
+        "matcher": "Bash|Read|Write|Edit|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/log-tool-input.sh"
+          }
+        ]
       }
     ]
   },
