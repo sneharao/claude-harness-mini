@@ -64,7 +64,7 @@ Look at the structure under the source root. Match against these patterns:
 
 | Pattern | Shape |
 |---------|-------|
-| `src/features/<x>/`, `app/<x>/` (Next.js App Router), `Features/<X>/` (.NET) — per-feature folders that own multiple concerns | **vertical slices** |
+| `src/features/<x>/`, `Features/<X>/` (.NET), `src/app/<x>/` (Next.js App Router) — per-feature folders that own multiple concerns | **vertical slices** (run the persona-based drift check below for stack-specific anti-patterns inside the slice) |
 | `src/{controllers,services,repositories}` or `app/{routes,services,models}` (sibling layer folders, code grouped by technical role) | **n-tier** |
 | `domain/`, `application/`, `infrastructure/` (ring layout) | **onion / hexagonal** |
 | Source files mostly flat under `src/`, no obvious grouping | **flat** |
@@ -72,6 +72,31 @@ Look at the structure under the source root. Match against these patterns:
 | None of the above | **unclassified** — describe what you do see |
 
 For each classification, also flag **drift**: places where the detected shape doesn't hold. For example, "Mostly vertical slices, but `src/utils.ts` is a bucket of unrelated helpers that several slices import — violates cross-slice isolation."
+
+### Step 4b — Persona-based drift check (stack-specific)
+
+After the generic classification above, check whether a stack persona exists for the detected stack:
+
+```bash
+ls harness/skills/init/persona-*.md
+```
+
+Match the detected stack against persona filenames and first headings. If exactly one persona matches (e.g. detected stack is "Next.js" → `persona-nextjs.md`), **read the persona file in full** and treat its **"Anti-patterns"** and **"Discipline rules"** sections as the stack-specific drift contract.
+
+Then scan the codebase for violations of *those specific rules* and list them as stack-specific drift.
+
+For example, when `persona-nextjs.md` matches, the audit walks each `src/app/<feature>/` and `src/features/<feature>/` folder and checks the persona's rules — e.g. files inside `src/app/<feature>/` that aren't Next routing primitives (`page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, `not-found.tsx`, `route.ts`, `actions.ts`), or `handler.ts` files missing `import "server-only";` on the first line, or Next cache primitives (`revalidatePath`, `revalidateTag`) called inside `handler.ts`. The persona is the authoritative source; this skill never inlines its rules.
+
+Record each violation under a new audit section **"Stack-specific drift (`<persona>`)"** with:
+- The rule violated (quoted from the persona).
+- The file or location.
+- A one-line "what to do" pointer (e.g. "lift logic into `src/features/<x>/handler.ts`; leave `src/app/<x>/` as a transport shim").
+
+Also read the persona's **`## Remediation`** section (if present). It names the skill that fixes violations of this persona — quote it once at the top of the "Stack-specific drift" section so the human can navigate from the audit to the fix. If the persona has no `## Remediation` section, omit; do not invent one.
+
+If no persona matches the detected stack, skip this step and note in the audit: *"No stack persona available for `<stack>` — stack-specific drift not checked."*
+
+This skill remains read-only. Do not auto-fix anything.
 
 ### Step 5 — Branch-naming compliance
 
@@ -142,6 +167,15 @@ These are *candidates*. The human confirms or corrects in the next step (seed-do
 ### Drift
 
 <places where the classification doesn't hold; e.g. a "shared bucket" or cross-slice import>
+
+## Stack-specific drift (`<persona>` or "not checked")
+
+<If a stack persona matched in step 4b:
+
+- First line: quote the persona's `## Remediation` pointer (the skill that fixes these violations), if the persona has one. Skip if the persona doesn't declare one.
+- Then list each violation: quote the rule from the persona, name the file, give a one-line "what to do" pointer.
+
+If no persona matched, write: "No stack persona available for `<stack>` — stack-specific drift not checked.">
 
 ## Branch-naming compliance
 

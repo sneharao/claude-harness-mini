@@ -86,6 +86,25 @@ Run `/harness/init-harness` — it audits the existing code, seeds domain files 
 
 ---
 
+## Stack personas
+
+The harness adapts to your stack via personas under `harness/skills/init/persona-*.md`. Each persona is the **single source of truth** for its stack and declares:
+
+- The slice shape (file naming, role split, transport conventions).
+- Discipline rules and anti-patterns specific to the stack.
+- An optional `## Remediation` pointer to the skill that fixes violations.
+
+The audit (`/harness/init-harness`) reads the matching persona, scans the codebase against its anti-patterns, and surfaces violations + the persona's remediation pointer in `audit.md` — so the human knows both what's wrong and which skill fixes it.
+
+If your stack has no persona yet, the harness falls back to the generic vertical-slice shape and you document deviations in an ADR. Adding `persona-<stack>.md` — and an optional matching migration skill — extends the harness to a new stack with no other code changes.
+
+List available personas:
+```bash
+ls harness/skills/init/persona-*.md
+```
+
+---
+
 ## Commit guardrails
 
 Two layers keep bad commits out:

@@ -102,7 +102,7 @@ Read the chosen persona file in full. Execute its instructions:
 - Materialise files declared in `### Output → <path>` blocks (typically `package.json`, stack-specific code-standards files like `typescript-and-zod.md` or `ui/react-patterns.md`, framework config).
 - Merge any `### Merge into package.json` blocks into the existing `package.json` (if one was created by an earlier persona step).
 - Install dependencies if the persona declares them and the human approves (do not run package-manager commands without confirmation).
-- Note any **layout override** the persona declares (e.g. Next.js places features under `app/`) — this is the persona authoritatively shaping the project structure, see [`vertical-slice-conventions.md` § Stack Overrides](../knowledge/repo-architecture/vertical-slice-conventions.md#stack-overrides).
+- Note any **layout override** the persona declares — the persona is the authoritative source for the slice shape in that stack (file casing, file roles, transport split). See [`vertical-slice-conventions.md` § Stack Overrides](../knowledge/repo-architecture/vertical-slice-conventions.md#stack-overrides) for the registry of overrides.
 
 ### Step 8 — Initialise Source Tree
 
