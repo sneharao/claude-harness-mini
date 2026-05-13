@@ -7,6 +7,7 @@ Local, file-based eval scaffold for harness runs. Reads OTLP events emitted by C
 ```
 .evals/
 ├── run-report.mjs       — descriptive summary script (what happened)
+├── audit-commits.mjs    — user-initiated commit-history audit (what landed, what to flag)
 ├── judges/
 │   └── conformance.mjs  — six-parameter harness-control score (what was followed)
 └── reports/             — generated per-session reports (gitignored)
@@ -57,6 +58,27 @@ Claude Code's built-in `tool_decision` / `tool_result` events redact tool argume
 The hook is wired up in `.claude/settings.json`. It runs only when `CLAUDE_CODE_ENABLE_TELEMETRY` is set and is bounded to 500ms fire-and-forget — tool latency is unchanged even if the collector is down.
 
 Sessions captured before the hook was wired up will report Skill-Read-Before-Action as N/A; the composite re-normalises across the remaining five parameters.
+
+## Commit-history audit — user-initiated
+
+Scans recent commits for violations of the harness's commit-message and filename rules, then **suggests** entries you could log into `harness/housekeeping/agent-corrections.md`. **Nothing is auto-appended** — you decide whether each finding is an agent mistake (log it) or a rule that needs updating (open an exec-plan).
+
+This is intentionally user-initiated, not part of any hook or auto-housekeeping flow. Per the drift rule in `harness/skills/housekeeping/harness-improvement-review.md`, rule changes must go through human review — the audit just surfaces candidates.
+
+```bash
+node .evals/audit-commits.mjs                  # last 10 commits (default)
+node .evals/audit-commits.mjs --count=25
+node .evals/audit-commits.mjs --range=main..HEAD
+```
+
+Checks:
+
+- **Commit message** — summary ≤ 100 chars, `Type: <feat|fix|refactor|chore|docs|test>` present and valid, no `Co-Authored-By` or `Authored by Cursor` trailers (per `harness/skills/development/commit-changes.md`).
+- **Added/renamed file names** — flags `.spec.` extensions (rule says `<thing>.test.<ext>`).
+
+Writes `.evals/reports/commit-audit-<timestamp>.md` with one entry per finding plus a paste-ready correction-log template.
+
+---
 
 ## Why local files, not a SaaS
 

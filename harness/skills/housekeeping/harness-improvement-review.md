@@ -6,6 +6,14 @@ Run this skill at the start of a housekeeping session, or whenever `agent-correc
 
 ---
 
+## Drift rule — read first
+
+When the code and a harness rule disagree, ask the human which is correct. Never assume the code is the new standard. Translating a divergence into a rule change requires a human decision — it cannot be inferred from agent behaviour, commit history, or pattern frequency alone.
+
+Apply this throughout the steps below. Step 4 in particular: if a cluster of corrections suggests the *rule* was wrong (rather than the agent's interpretation of it), your proposal is "review this rule with the human," not "update the rule to match what the code did."
+
+---
+
 ## Step 1 — Read the corrections log
 
 Open `harness/housekeeping/agent-corrections.md` and read all entries with `status: open`.
