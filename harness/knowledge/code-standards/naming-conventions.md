@@ -15,6 +15,8 @@ Universal naming rules that apply regardless of language or framework. Stack-spe
 | Async functions | imperative verb, no `Async` suffix | `fetchOrders`, not `fetchOrdersAsync` |
 | Test files | `<thing>.test.<ext>` or `<thing>.integration.test.<ext>` | `order-service.test.ts` |
 
+> **Stack overrides:** the **file and directory** row is the only one a stack persona may override. For example, `skills/init/persona-react-vite.md` uses PascalCase for component files (`CreateUser.tsx`) and feature folders (`src/Features/CreateUser/`), following React community convention. `skills/init/persona-nextjs.md` keeps kebab-case because Next's filesystem routing turns folder names into URLs. The identifier rows (types, functions, constants, etc.) are universal — personas do not override them.
+
 ## Interfaces
 
 - **No `I` prefix.** Write `OrderRepository`, not `IOrderRepository`. The hungarian-style prefix is a relic of older codebases — modern type systems make it redundant.
