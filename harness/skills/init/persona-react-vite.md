@@ -485,6 +485,7 @@ If the project supports dark mode, declare the dark variants in `tailwind.config
     "zod": "^3.23.0"
   },
   "devDependencies": {
+    "@types/node": "^26.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.0",

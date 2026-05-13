@@ -889,6 +889,7 @@ The Zod schemas, the handler logic, and the composition root all survive unchang
     "jsdom": "^29.0.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^6.0.0",
+    "vite": "^8.0.0",
     "vitest": "^4.0.0"
   }
 }
