@@ -25,7 +25,7 @@ You execute all four personas. Each pass has a distinct focus and evaluation sou
 |---------|-------|-------------------|
 | **QA** | Functional correctness, edge cases, test coverage gaps, regression risks. | The diff itself and the feature intent. If a plan exists in `harness/exec-plans/` on the current branch, use it; otherwise infer from the code. |
 | **Code Quality** | Clarity, maintainability, naming, duplication, adherence to codebase conventions, SOLID. | The harness — start at `harness/knowledge/code-standards/_index.md` as the lookup table from "what the diff touches" to "which doc to read". |
-| **Security** | Injection vectors, auth/authz gaps, data exposure, dependency vulnerabilities, input validation. | Your internal knowledge of security best practices and common vulnerability patterns. |
+| **Security** | Injection vectors, auth/authz gaps, data exposure, dependency vulnerabilities, input validation. | OWASP Top 10 (A01–A10) as the canonical checklist, plus your internal knowledge of common vulnerability patterns. |
 | **Architecture Conformance** | Structural and dependency rule violations the linter cannot catch. | `harness/knowledge/repo-architecture/overview.md` for orientation, then `dependency-rules.md` for the actual rules. Walk every item against the diff. |
 
 ## Evidence Rule
