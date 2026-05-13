@@ -1,15 +1,16 @@
 # Persona — React + Vite + Tailwind + TS + Vitest
 
-The default UI persona. Picks React 19, Vite 7, TypeScript strict, Tailwind 4, Vitest 2 — with Zod for boundary validation. Optimised for **Onion-ready vertical slices**: each feature separates transport (Web/HTTP) from business logic, so the project can graduate to onion/hex later without rewriting the logic layer.
+The default UI persona. Picks React 19, Vite 8, TypeScript 6 strict, Tailwind 4, Vitest 4 — with Zod for boundary validation. Optimised for **Onion-ready vertical slices**: each feature separates transport (Web/HTTP) from business logic, so the project can graduate to onion/hex later without rewriting the logic layer.
 
 ## Stack
 
 - React 19
 - React Router v7 (data routers — `loader` + `action`)
-- Vite 7
-- TypeScript 5.4+ (strict)
+- Vite 8
+- TypeScript 6+ (strict)
 - Tailwind CSS 4
-- Vitest 2 (V8 coverage)
+- Node.js 26 (current; goes LTS Oct 2026 — verify before pinning a project to LTS)
+- Vitest 4 (V8 coverage)
 - Zod for input/output schemas at the boundary
 
 ## Layout Override (this persona's slice shape)
@@ -331,7 +332,7 @@ How to write tests for the four buckets each slice owns: `api/`, `boundary/`, `i
 
 ## Tooling
 
-- **Vitest 2** — test runner, assertion library, mocking.
+- **Vitest 4** — test runner, assertion library, mocking.
 - **@testing-library/react** — component rendering, query selectors that mirror user behaviour.
 - **@testing-library/user-event** — simulates real user interactions (keyboard, click, hover).
 - **MSW (Mock Service Worker)** — optional, for intercepting fetch in `ui/` tests when needed.
@@ -486,15 +487,15 @@ If the project supports dark mode, declare the dark variants in `tailwind.config
   "devDependencies": {
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@vitejs/plugin-react": "^4.3.0",
+    "@vitejs/plugin-react": "^6.0.0",
     "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^14.5.0",
-    "@vitest/coverage-v8": "^2.0.0",
-    "jsdom": "^25.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "jsdom": "^29.0.0",
     "tailwindcss": "^4.0.0",
-    "typescript": "^5.4.0",
-    "vite": "^7.0.0",
-    "vitest": "^2.0.0"
+    "typescript": "^6.0.0",
+    "vite": "^8.0.0",
+    "vitest": "^4.0.0"
   }
 }
 ```

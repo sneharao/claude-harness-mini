@@ -1,16 +1,17 @@
 # Persona — Next.js (App Router) + TypeScript + Tailwind + Vitest
 
-The Next.js UI persona. Picks Next 15 (App Router), TypeScript strict, Tailwind 4, Vitest 2 — with Zod for boundary validation. Optimised for **hex/onion-ready vertical slices on Next App Router**: the slice lives outside Next's routing tree so the project can graduate to onion/hex later without rewriting business logic.
+The Next.js UI persona. Picks Next 16 (App Router), TypeScript 6 strict, Tailwind 4, Vitest 4 — with Zod for boundary validation. Optimised for **hex/onion-ready vertical slices on Next App Router**: the slice lives outside Next's routing tree so the project can graduate to onion/hex later without rewriting business logic.
 
 This persona is an alternative to `persona-react-vite.md`. Exactly one stack persona is applied per project. The knowledge files this persona writes overlap in path with the React+Vite persona's outputs — that's expected, since only one of them ever runs in a given repo.
 
 ## Stack
 
-- Next.js 15 (App Router only — Pages Router is out of scope for this persona)
+- Next.js 16 (App Router only — Pages Router is out of scope for this persona)
 - React 19 (Server Components by default)
-- TypeScript 5.4+ (strict)
+- TypeScript 6+ (strict)
 - Tailwind CSS 4
-- Vitest 2 (V8 coverage) for unit / boundary / integration
+- Node.js 26 (current; goes LTS Oct 2026 — verify before pinning a project to LTS)
+- Vitest 4 (V8 coverage) for unit / boundary / integration
 - Playwright (optional) for true end-to-end through the running Next server
 - Zod for input/output schemas at every transport boundary
 - `server-only` and `client-only` packages as compile-time guards
@@ -572,7 +573,7 @@ How to write tests for the four buckets each slice owns: `api/`, `boundary/`, `i
 
 ## Tooling
 
-- **Vitest 2** — test runner, assertion library, mocking.
+- **Vitest 4** — test runner, assertion library, mocking.
 - **@testing-library/react** — component rendering, query selectors that mirror user behaviour.
 - **@testing-library/user-event** — simulates real user interactions.
 - **Playwright** (optional) — true browser e2e through the running Next server, for caching/streaming/hydration behaviour Vitest can't reproduce.
@@ -869,7 +870,7 @@ The Zod schemas, the handler logic, and the composition root all survive unchang
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "next": "^15.0.0",
+    "next": "^16.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "clsx": "^2.1.0",
@@ -879,16 +880,16 @@ The Zod schemas, the handler logic, and the composition root all survive unchang
     "client-only": "^0.0.1"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
+    "@types/node": "^26.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^14.5.0",
-    "@vitest/coverage-v8": "^2.0.0",
-    "jsdom": "^25.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
+    "jsdom": "^29.0.0",
     "tailwindcss": "^4.0.0",
-    "typescript": "^5.4.0",
-    "vitest": "^2.0.0"
+    "typescript": "^6.0.0",
+    "vitest": "^4.0.0"
   }
 }
 ```
