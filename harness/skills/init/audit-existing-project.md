@@ -16,6 +16,29 @@ You are called by `harness/skills/init/init-harness.md` after the human has conf
 4. Branch-naming compliance.
 5. Naming-convention drift.
 
+## Scope guard
+
+This audit is **descriptive, not prescriptive**. It records *what is*. Stay inside this scope or the audit will pre-empt downstream harness stages.
+
+Recommendations in the audit are limited to:
+
+1. **Single-line fixes** for drift the audit already counted — rename a branch, add `import "server-only";`, fix a typo in a folder name.
+2. **ADR pointers** for architecture decisions the code forces — write via `harness/skills/planning/write-adr.md`.
+
+Do **not** include in the audit:
+
+- **Feature taxonomies** — that's `seed-domain-knowledge`'s job, informed by ubiquitous language, not URL paths. URL segments under `src/app/api/<x>/` are *transports*, not features; do not list them as slice candidates.
+- **Migration sequences** — that's `/harness/001-plan`'s job, after ADRs are accepted.
+- **File layouts** — persona-proposed targets (e.g. `src/features/<x>/handler.ts`) are *gated on ADR-0001*. Report the gap; do not pre-decide the target.
+- **Slice / branch / commit boundaries** for work the planner will scope.
+- **Code redesigns** — including renamed types, port names, or replacement libraries. Drift is reported; design is not.
+
+**Self-check before writing each "Recommended next steps" bullet.** It must reference either:
+- (a) a drift count already in the audit ("rename 3 branches", "fix the casing on the listed 7 files"), or
+- (b) an open architectural question the human must decide ("open ADR-0001 to choose layout").
+
+If neither applies, delete the bullet.
+
 ## Steps
 
 ### Step 1 — Create the output directory
@@ -196,11 +219,20 @@ Reference: `harness/knowledge/code-standards/naming-conventions.md`.
 
 ## Recommended next steps
 
-- <e.g. "Rename 3 non-compliant branches" — explicit list>
-- <e.g. "Fix file-casing on the 7 listed files">
-- <e.g. "Open ADR-0001 capturing why the project uses onion architecture instead of the vertical-slice default">
+This section follows the **Scope guard** above. Only single-line fixes and ADR pointers belong here; migration sequencing happens later in `/harness/001-plan`.
 
-These are suggestions. The human triages and decides which to address via `/harness/001-plan`.
+**Blocking decisions (ADRs):**
+
+- <e.g. "Open ADR-0001 — choose between persona-target layout and documenting the current layout as accepted">
+- <e.g. "Open ADR-0002 — choose file-casing rule (kebab-case migration vs. community convention)">
+
+**Single-line fixes (safe without an ADR):**
+
+- <e.g. "Rename 3 non-compliant branches" — explicit list from the branch section>
+- <e.g. "Add `import \"server-only\";` to `<file>`">
+- <e.g. "Rename `<folder-typo>` → `<folder>`">
+
+**Out of audit scope:** migration plans, feature taxonomy, slice boundaries, port naming, code rewrites. These live in `/harness/001-plan onboard-cleanup`, informed by domain knowledge and accepted ADRs.
 ```
 
 ### Step 8 — Return
