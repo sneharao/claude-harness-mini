@@ -10,7 +10,7 @@ This persona is an alternative to `persona-react-vite.md`. Exactly one stack per
 - React 19 (Server Components by default)
 - TypeScript 6+ (strict)
 - Tailwind CSS 4
-- Node.js 26 (current; goes LTS Oct 2026 — verify before pinning a project to LTS)
+- Node.js 24 (active LTS through April 2027 — bump to Node 26 after it goes LTS in October 2026)
 - Vitest 4 (V8 coverage) for unit / boundary / integration
 - Playwright (optional) for true end-to-end through the running Next server
 - Zod for input/output schemas at every transport boundary
@@ -880,7 +880,7 @@ The Zod schemas, the handler logic, and the composition root all survive unchang
     "client-only": "^0.0.1"
   },
   "devDependencies": {
-    "@types/node": "^26.0.0",
+    "@types/node": "^24.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@testing-library/react": "^16.0.0",
