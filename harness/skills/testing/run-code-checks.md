@@ -71,7 +71,7 @@ Read the error output carefully — `tsc` reports file, line, and expected vs ac
 
 ### Build failures
 
-Build failures usually surface as Vite/Rollup errors with a file and import path. Common causes: an alias unresolved by the bundler (check `vite.config.ts`), a server-only module imported into a client bundle (or vice versa), a missing build-time env var, or a top-level side effect that can't be statically analysed. Reproduce locally with the exact CI command — `npm run dev` uses different module resolution and won't catch these.
+Build failures usually surface as bundler errors (Vite/Rollup for Vite stacks; webpack/Turbopack for Next.js) with a file and import path. Common causes: an alias unresolved by the bundler (check the bundler config — `vite.config.ts`, `next.config.ts`, or equivalent), a server-only module imported into a client bundle (or vice versa), a missing build-time env var, or a top-level side effect that can't be statically analysed. Reproduce locally with the exact CI command — `npm run dev` uses different module resolution and won't catch these.
 
 ---
 
