@@ -100,19 +100,22 @@ Present a summary of the changes:
 - Confirmation that all checks pass.
 - The completed `## Conformance` section.
 
-Ask the human to review and confirm. The human may:
+Then **explicitly offer the pre-push 4-persona review** (`003_2_review_local`) as an option — do not assume the human knows it is available. The review inspects `git diff HEAD` (staged + unstaged), so it must run while the changes are still uncommitted; running it after Step 5 is not possible.
 
-- **Approve** — proceed to Step 5.
-- **Request changes** — implement changes and return to the Step 3 loop, then return to this step.
+Ask the human to choose one of:
 
-Do not proceed to Step 5 until the human has explicitly approved.
+- **Approve and push** — proceed to Step 5 without running `003_2_review_local`. Acceptable for small or low-risk changes; `003_1_review_pr` can still run after the push.
+- **Run the pre-push review first** — invoke `003_2_review_local`, present findings, then return to this step. If the review surfaces blocking findings, return to the Step 3a (Implement) loop to address them and re-run Steps 3b–3e; otherwise proceed to Step 5.
+- **Request changes** — implement changes and return to the Step 3a (Implement) loop, then return to this step.
+
+Do not proceed to Step 5 until the human has explicitly chosen one of the options above.
 
 ### Step 5 — Commit and Push
 
 1. **Commit** with a clear message per `harness/skills/development/commit-changes.md`.
 2. **Push** to the current branch.
 
-After pushing, the human chooses the next review mode: `003_2_review_local` (already done if used pre-push) or `003_1_review_pr` for a fresh-context pass against the pushed branch.
+After pushing, run `003_1_review_pr` — a fresh-context pass against the pushed branch — unless `003_2_review_local` already ran in Step 4 and no further changes were made.
 
 ## Done
 
